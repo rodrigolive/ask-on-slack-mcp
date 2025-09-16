@@ -33,21 +33,41 @@ export function parseArgs(args?: string[]): Config {
     .name('ask-on-slack-mcp')
     .description('Ask on Slack MCP Server - Enables AI assistants to request information from humans via Slack')
     .version('0.1.0')
-    .requiredOption('--slack-bot-token <token>', 'Slack bot token (xoxb-...)')
-    .requiredOption('--slack-app-token <token>', 'Slack app token for Socket Mode (xapp-...)')
-    .requiredOption('--slack-channel-id <id>', 'Slack channel ID (C...)')
-    .requiredOption('--slack-user-id <id>', 'Slack user ID (U...)')
+    .option('--slack-bot-token <token>', 'Slack bot token (xoxb-...) or use ASK_SLACK_BOT env var')
+    .option('--slack-app-token <token>', 'Slack app token for Socket Mode (xapp-...) or use ASK_SLACK_APP env var')
+    .option('--slack-channel-id <id>', 'Slack channel ID (C...) or use ASK_SLACK_CHANNEL env var')
+    .option('--slack-user-id <id>', 'Slack user ID (U...) or use ASK_SLACK_USER env var')
     .option('--log-level <level>', 'Log level (DEBUG, INFO, WARN, ERROR)', 'INFO')
     .exitOverride()
     .parse(args, { from: 'user' });
 
   const options = cmd.opts();
 
+  // Get values from command line options or environment variables
+  const slackBotToken = options.slackBotToken || process.env.ASK_SLACK_BOT;
+  const slackAppToken = options.slackAppToken || process.env.ASK_SLACK_APP;
+  const slackChannelId = options.slackChannelId || process.env.ASK_SLACK_CHANNEL;
+  const slackUserId = options.slackUserId || process.env.ASK_SLACK_USER;
+
+  // Validate that all required values are present
+  if (!slackBotToken) {
+    throw new Error('Slack bot token is required. Provide --slack-bot-token or set ASK_SLACK_BOT environment variable.');
+  }
+  if (!slackAppToken) {
+    throw new Error('Slack app token is required. Provide --slack-app-token or set ASK_SLACK_APP environment variable.');
+  }
+  if (!slackChannelId) {
+    throw new Error('Slack channel ID is required. Provide --slack-channel-id or set ASK_SLACK_CHANNEL environment variable.');
+  }
+  if (!slackUserId) {
+    throw new Error('Slack user ID is required. Provide --slack-user-id or set ASK_SLACK_USER environment variable.');
+  }
+
   return {
-    slackBotToken: options.slackBotToken,
-    slackAppToken: options.slackAppToken,
-    slackChannelId: options.slackChannelId,
-    slackUserId: options.slackUserId,
+    slackBotToken,
+    slackAppToken,
+    slackChannelId,
+    slackUserId,
     logLevel: options.logLevel,
   };
 }

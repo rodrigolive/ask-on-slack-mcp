@@ -113,13 +113,36 @@ bun run build
 
 ## Configuration
 
-All configuration is passed via command-line arguments:
+Configuration can be provided via command-line arguments or environment variables. Command-line arguments take precedence over environment variables.
+
+### Command-Line Arguments
 
 - `--slack-bot-token` - Bot User OAuth Token (xoxb-...)
 - `--slack-app-token` - App-Level Token for Socket Mode (xapp-...)
 - `--slack-channel-id` - Channel ID where the bot will operate
 - `--slack-user-id` - User ID to mention when asking questions
 - `--log-level` - (Optional) Logging level (default: INFO)
+
+### Environment Variables (Alternative)
+
+You can also set these environment variables instead of using command-line arguments:
+
+- `ASK_SLACK_BOT` - Bot User OAuth Token (xoxb-...)
+- `ASK_SLACK_APP` - App-Level Token for Socket Mode (xapp-...)
+- `ASK_SLACK_CHANNEL` - Channel ID where the bot will operate
+- `ASK_SLACK_USER` - User ID to mention when asking questions
+
+### Example with Environment Variables
+
+```bash
+export ASK_SLACK_BOT="xoxb-your-bot-token"
+export ASK_SLACK_APP="xapp-your-app-token"
+export ASK_SLACK_CHANNEL="C1234567890"
+export ASK_SLACK_USER="U1234567890"
+
+# Now you can run without command-line arguments
+bunx @rodrigolive/ask-on-slack-mcp
+```
 
 ## Usage
 
@@ -154,6 +177,27 @@ Configure your MCP client to use this server from npm:
         "--slack-channel-id", "C1234567890",
         "--slack-user-id", "U1234567890"
       ]
+    }
+  }
+}
+```
+
+### With MCP Client (Using Environment Variables)
+
+You can also configure using environment variables:
+
+```json
+{
+  "mcpServers": {
+    "ask-on-slack": {
+      "command": "npx",
+      "args": ["@rodrigolive/ask-on-slack-mcp"],
+      "env": {
+        "ASK_SLACK_BOT": "xoxb-your-token",
+        "ASK_SLACK_APP": "xapp-your-token",
+        "ASK_SLACK_CHANNEL": "C1234567890",
+        "ASK_SLACK_USER": "U1234567890"
+      }
     }
   }
 }
