@@ -8,6 +8,7 @@ export interface Config {
   slackChannelId: string;
   slackUserId: string;
   logLevel?: string;
+  logFile?: string;
 }
 
 export interface PendingResponse {

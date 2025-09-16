@@ -122,6 +122,7 @@ Configuration can be provided via command-line arguments or environment variable
 - `--slack-channel-id` - Channel ID where the bot will operate
 - `--slack-user-id` - User ID to mention when asking questions
 - `--log-level` - (Optional) Logging level (default: INFO)
+- `--log-file` - (Optional) Log file path (if specified, logs will be written to file instead of stderr)
 
 ### Environment Variables (Alternative)
 
@@ -143,6 +144,26 @@ export ASK_SLACK_USER="U1234567890"
 # Now you can run without command-line arguments
 bunx @rodrigolive/ask-on-slack-mcp
 ```
+
+### Example with Log File
+
+```bash
+# Log to a file instead of stderr
+bunx @rodrigolive/ask-on-slack-mcp \
+  --slack-bot-token "xoxb-your-token" \
+  --slack-app-token "xapp-your-token" \
+  --slack-channel-id "C1234567890" \
+  --slack-user-id "U1234567890" \
+  --log-file "/tmp/ask-on-slack.log" \
+  --log-level "DEBUG"
+```
+
+### Logging Behavior
+
+- **Without `--log-file`**: All log messages are written to stderr (default behavior)
+- **With `--log-file`**: All log messages are written to the specified file instead of stderr
+- **Log levels**: DEBUG, INFO, WARN, ERROR (default: INFO)
+- **Log format**: `[LEVEL] YYYY-MM-DDTHH:mm:ss.sssZ - message`
 
 ## Usage
 

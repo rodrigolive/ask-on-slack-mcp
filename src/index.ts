@@ -11,17 +11,49 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Command } from 'commander';
+import { createWriteStream, WriteStream } from 'fs';
 import { HumanInSlack, SlackHandler } from './slack-client.js';
 import { Config } from './types.js';
 
+let logStream: WriteStream | null = null;
+
 const logger = {
-  info: (message: string) => console.error(`[INFO] ${new Date().toISOString()} - ${message}`),
-  error: (message: string) => console.error(`[ERROR] ${new Date().toISOString()} - ${message}`),
-  warn: (message: string) => console.error(`[WARN] ${new Date().toISOString()} - ${message}`),
+  info: (message: string) => {
+    const logMessage = `[INFO] ${new Date().toISOString()} - ${message}\n`;
+    if (logStream) {
+      logStream.write(logMessage);
+    } else {
+      console.error(logMessage.trim());
+    }
+  },
+  error: (message: string) => {
+    const logMessage = `[ERROR] ${new Date().toISOString()} - ${message}\n`;
+    if (logStream) {
+      logStream.write(logMessage);
+    } else {
+      console.error(logMessage.trim());
+    }
+  },
+  warn: (message: string) => {
+    const logMessage = `[WARN] ${new Date().toISOString()} - ${message}\n`;
+    if (logStream) {
+      logStream.write(logMessage);
+    } else {
+      console.error(logMessage.trim());
+    }
+  },
 };
 
-function setupLogging(logLevel: string = 'INFO'): void {
-  // In a real implementation, you'd configure logging levels here
+function setupLogging(logLevel: string = 'INFO', logFile?: string): void {
+  if (logFile) {
+    try {
+      logStream = createWriteStream(logFile, { flags: 'a' });
+      logger.info(`Log file set to: ${logFile}`);
+    } catch (error) {
+      console.error(`Failed to create log file ${logFile}: ${error}`);
+      process.exit(1);
+    }
+  }
   logger.info(`Log level set to: ${logLevel}`);
 }
 
@@ -38,6 +70,7 @@ export function parseArgs(args?: string[]): Config {
     .option('--slack-channel-id <id>', 'Slack channel ID (C...) or use ASK_SLACK_CHANNEL env var')
     .option('--slack-user-id <id>', 'Slack user ID (U...) or use ASK_SLACK_USER env var')
     .option('--log-level <level>', 'Log level (DEBUG, INFO, WARN, ERROR)', 'INFO')
+    .option('--log-file <file>', 'Log file path (if specified, logs will be written to file instead of stderr)')
     .exitOverride()
     .parse(args, { from: 'user' });
 
@@ -69,12 +102,13 @@ export function parseArgs(args?: string[]): Config {
     slackChannelId,
     slackUserId,
     logLevel: options.logLevel,
+    logFile: options.logFile,
   };
 }
 
 async function main() {
   const config = parseArgs();
-  setupLogging(config.logLevel);
+  setupLogging(config.logLevel, config.logFile);
 
   // Create human handler
   const human = new HumanInSlack(config.slackUserId, config.slackChannelId);
@@ -308,11 +342,31 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
 });
 
+// Cleanup function to close log stream
+function cleanup() {
+  if (logStream) {
+    logStream.end();
+    logStream = null;
+  }
+}
+
 // Only run main if this file is executed directly (not imported)
 if (import.meta.main) {
+  // Setup cleanup handlers
+  process.on('exit', cleanup);
+  process.on('SIGINT', () => {
+    cleanup();
+    process.exit(0);
+  });
+  process.on('SIGTERM', () => {
+    cleanup();
+    process.exit(0);
+  });
+
   main().catch((error) => {
     logger.error(`Fatal error: ${error}`);
     logger.error(error.stack || '');
+    cleanup();
     process.exit(1);
   });
 }
