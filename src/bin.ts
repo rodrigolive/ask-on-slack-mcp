@@ -16,7 +16,7 @@ const indexPath = join(__dirname, 'index.js');
 
 // Pass through all arguments and environment
 const child = spawn(process.execPath, [indexPath, ...process.argv.slice(2)], {
-  stdio: 'inherit',
+  stdio: ['inherit', 'inherit', 'inherit'],
   env: process.env,
 });
 
