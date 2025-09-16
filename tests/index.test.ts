@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, mock } from 'bun:test'
 import { parseArgs } from '../src/index'
 
 describe('CLI Argument Parsing', () => {

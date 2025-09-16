@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Binary entry point for npx execution
+ * Binary entry point for npm package execution
  */
 
 import { spawn } from 'child_process';

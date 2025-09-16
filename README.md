@@ -1,13 +1,13 @@
-# Human-in-the-Loop Slack MCP Server
+# Ask on Slack MCP Server
 
 A Model Context Protocol (MCP) server that enables AI assistants to request information from humans via Slack. This server acts as a bridge between AI systems and human experts, allowing AI to ask questions and receive responses through Slack when it needs human knowledge or clarification.
 
-## Quick Start with npx
+## Quick Start with npm
 
-Run directly from GitHub without installation:
+Install and run the package:
 
 ```bash
-npx github:trtd56/AskOnSlackMCP \
+npx @rodrigolive/ask-on-slack-mcp \
   --slack-bot-token "xoxb-your-bot-token" \
   --slack-app-token "xapp-your-app-token" \
   --slack-channel-id "C1234567890" \
@@ -21,10 +21,10 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
 ```json
 {
   "mcpServers": {
-    "slack-human": {
+    "ask-on-slack": {
       "command": "npx",
       "args": [
-        "github:trtd56/AskOnSlackMCP",
+        "@rodrigolive/ask-on-slack-mcp",
         "--slack-bot-token", "xoxb-your-actual-token",
         "--slack-app-token", "xapp-your-actual-token", 
         "--slack-channel-id", "C1234567890",
@@ -72,24 +72,43 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
      - `message.im` - Direct messages (optional)
    - Save changes and reinstall the app to your workspace
 
-## Installation (Optional)
+## Installation
 
-If you want to install locally instead of using npx:
+### Global Installation
+
+Install the package globally:
+
+```bash
+npm install -g @rodrigolive/ask-on-slack-mcp
+```
+
+Then run it directly:
+```bash
+ask-on-slack-mcp \
+  --slack-bot-token "xoxb-your-bot-token" \
+  --slack-app-token "xapp-your-app-token" \
+  --slack-channel-id "C1234567890" \
+  --slack-user-id "U1234567890"
+```
+
+### Local Development
+
+If you want to install locally for development:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/trtd56/AskOnSlackMCP.git
-cd AskOnSlackMCP
+git clone https://github.com/rodrigolive/ask-on-slack-mcp.git
+cd ask-on-slack-mcp
 ```
 
 2. Install dependencies:
 ```bash
-npm install
+bun install
 ```
 
 3. Build the TypeScript code:
 ```bash
-npm run build
+bun run build
 ```
 
 ## Configuration
@@ -108,28 +127,28 @@ All configuration is passed via command-line arguments:
 
 Run with hot-reloading:
 ```bash
-npm run dev
+bun run dev
 ```
 
 ### Production Mode
 
 Build and run:
 ```bash
-npm run build
-npm start
+bun run build
+bun run start
 ```
 
 ### With MCP Client (Using npx)
 
-Configure your MCP client to use this server directly from GitHub:
+Configure your MCP client to use this server from npm:
 
 ```json
 {
   "mcpServers": {
-    "human-in-the-loop-slack": {
+    "ask-on-slack": {
       "command": "npx",
       "args": [
-        "github:trtd56/AskOnSlackMCP",
+        "@rodrigolive/ask-on-slack-mcp",
         "--slack-bot-token", "xoxb-your-token",
         "--slack-app-token", "xapp-your-token",
         "--slack-channel-id", "C1234567890",
@@ -140,17 +159,16 @@ Configure your MCP client to use this server directly from GitHub:
 }
 ```
 
-### With MCP Client (Local Installation)
+### With MCP Client (Global Installation)
 
-If you've installed locally:
+If you've installed globally:
 
 ```json
 {
   "mcpServers": {
-    "human-in-the-loop-slack": {
-      "command": "node",
+    "ask-on-slack": {
+      "command": "ask-on-slack-mcp",
       "args": [
-        "/path/to/AskOnSlackMCP/dist/index.js",
         "--slack-bot-token", "xoxb-your-token",
         "--slack-app-token", "xapp-your-token",
         "--slack-channel-id", "C1234567890",
@@ -188,14 +206,14 @@ Main tool for asking questions to humans via Slack.
 
 ### Scripts
 
-- `npm run build` - Compile TypeScript
-- `npm run dev` - Run with hot-reloading
-- `npm start` - Run compiled code
-- `npm test` - Run tests with Vitest
-- `npm run test:ci` - Run tests with coverage
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-- `npm run clean` - Clean build artifacts
+- `bun run build` - Compile TypeScript
+- `bun run dev` - Run with hot-reloading
+- `bun run start` - Run compiled code
+- `bun test` - Run tests with Bun's test runner
+- `bun run test:ci` - Run tests with coverage
+- `bun run lint` - Run ESLint
+- `bun run format` - Format code with Prettier
+- `bun run clean` - Clean build artifacts
 
 ### Project Structure
 
@@ -216,12 +234,12 @@ tests/
 
 ### Testing
 
-The project uses Vitest for testing. Tests are located in the `tests/` directory.
+The project uses Bun's built-in test runner. Tests are located in the `tests/` directory.
 
 To run tests:
 ```bash
-npm test              # Run tests in watch mode
-npm run test:ci       # Run tests once with coverage
+bun test              # Run tests in watch mode
+bun run test:ci       # Run tests once with coverage
 ```
 
 ### CI/CD
@@ -229,7 +247,7 @@ npm run test:ci       # Run tests once with coverage
 The project uses GitHub Actions for continuous integration and deployment.
 
 - **CI Workflow** (`ci.yml`): Runs on every push and pull request
-  - Tests on Node.js 18.x, 20.x, and 22.x
+  - Tests on Bun latest version
   - Runs linting and type checking
   - Generates code coverage reports
   - Builds the project

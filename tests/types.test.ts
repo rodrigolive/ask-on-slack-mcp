@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import type { Config, PendingResponse, MessageLogEntry, SlackMessageEvent } from '../src/types'
 
 describe('Type Definitions', () => {

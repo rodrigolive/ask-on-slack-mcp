@@ -30,8 +30,8 @@ export function parseArgs(args?: string[]): Config {
   const cmd = new Command();
   
   cmd
-    .name('human-in-the-loop-slack')
-    .description('Human-in-the-Loop Slack MCP Server - Enables AI assistants to request information from humans via Slack')
+    .name('ask-on-slack-mcp')
+    .description('Ask on Slack MCP Server - Enables AI assistants to request information from humans via Slack')
     .version('0.1.0')
     .requiredOption('--slack-bot-token <token>', 'Slack bot token (xoxb-...)')
     .requiredOption('--slack-app-token <token>', 'Slack app token for Socket Mode (xapp-...)')
@@ -62,7 +62,7 @@ async function main() {
   // Create MCP server
   const server = new Server(
     {
-      name: 'Human in the loop - Slack',
+      name: 'Ask on Slack MCP',
       version: '0.1.0',
     },
     {
@@ -275,7 +275,7 @@ async function main() {
   // Run MCP server
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info('Human-in-the-Loop Slack MCP server started');
+  logger.info('Ask on Slack MCP server started');
 }
 
 // グローバルエラーハンドラー
@@ -288,8 +288,11 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
 });
 
-main().catch((error) => {
-  logger.error(`Fatal error: ${error}`);
-  logger.error(error.stack || '');
-  process.exit(1);
-});
+// Only run main if this file is executed directly (not imported)
+if (import.meta.main) {
+  main().catch((error) => {
+    logger.error(`Fatal error: ${error}`);
+    logger.error(error.stack || '');
+    process.exit(1);
+  });
+}

@@ -1,22 +1,28 @@
 {
-  "name": "human-in-the-loop-slack-mcp",
+  "name": "@rodrigolive/ask-on-slack-mcp",
   "version": "0.1.0",
+  "private": true,
   "description": "Human-in-the-Loop MCP server that enables AI assistants to request information from humans via Slack",
   "main": "dist/index.js",
   "type": "module",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
-    "human-in-the-loop-slack": "./dist/bin.js"
+    "ask-on-slack-mcp": "./dist/bin.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "test": "vitest",
-    "test:ci": "vitest run --coverage",
+    "dev": "bun --hot src/index.ts",
+    "start": "bun dist/index.js",
+    "test": "bun test",
+    "test:ci": "bun test --coverage",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "clean": "rm -rf dist",
-    "prepare": "npm run build"
+    "prepare": "bun run build"
   },
   "keywords": [
     "mcp",
@@ -25,11 +31,15 @@
     "ai",
     "model-context-protocol"
   ],
-  "author": "Generated",
+  "author": "Rodrigo Oliveira <rodrigo@example.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/human-in-the-loop-slack-mcp.git"
+    "url": "https://github.com/rodrigolive/ask-on-slack-mcp.git"
+  },
+  "homepage": "https://github.com/rodrigolive/ask-on-slack-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/rodrigolive/ask-on-slack-mcp/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
@@ -44,11 +54,8 @@
     "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
-    "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.17.0",
     "prettier": "^3.4.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "typescript": "^5.7.2"
   }
 }
