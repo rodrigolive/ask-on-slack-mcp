@@ -1,7 +1,6 @@
 {
   "name": "@rodrigolive/ask-on-slack-mcp",
   "version": "0.1.0",
-  "private": true,
   "description": "Human-in-the-Loop MCP server that enables AI assistants to request information from humans via Slack",
   "main": "dist/index.js",
   "type": "module",
