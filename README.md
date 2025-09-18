@@ -305,10 +305,12 @@ The server provides three MCP tools for interacting with humans via Slack:
 
 ### `ask_the_boss_on_slack`
 
-Main tool for asking questions to humans via Slack.
+**Purpose**: Main tool for asking questions to humans via Slack when you need information that only they would know.
+
+**When to use**: Use for preferences, project-specific context, local environment details, non-public information, or when you have doubts. Only use this tool when you really need human input.
 
 **Parameters:**
-- `question` (string): The question to ask the human. Be specific and provide context.
+- `question` (string): The question to ask the human boss. Be specific and provide context.
 
 **Example:**
 ```json
@@ -320,9 +322,13 @@ Main tool for asking questions to humans via Slack.
 }
 ```
 
+**Important**: If the user replies with another question, call this tool again.
+
 ### `clarify_with_the_boss_on_slack`
 
-Use this tool to re-ask a question in a clearer way if the boss didn't understand or asked something back.
+**Purpose**: Re-ask a question in a clearer way if the boss didn't understand your original question or asked something back.
+
+**When to use**: If you called `ask_the_boss_on_slack` but the boss did not understand your question or asked anything back, you MUST use this tool to re-ask in a clearer way. Do not use this tool if you have not called `ask_the_boss_on_slack` before.
 
 **Parameters:**
 - `question` (string): The clarification to ask the human boss. Be specific and provide context.
@@ -339,7 +345,9 @@ Use this tool to re-ask a question in a clearer way if the boss didn't understan
 
 ### `acknowledge_the_boss_on_slack`
 
-Use this tool to acknowledge receiving a reply from the boss.
+**Purpose**: Acknowledge receiving a reply from the boss with a simple acknowledgment message.
+
+**When to use**: If you called `ask_the_boss_on_slack` and the boss replied, then you MUST use this tool to acknowledge the reply. Do not use this tool if you have not called `ask_the_boss_on_slack` before.
 
 **Parameters:**
 - `acknowledgement` (string): The text to tell the boss to acknowledge receiving their reply. Keep it short.
@@ -353,6 +361,18 @@ Use this tool to acknowledge receiving a reply from the boss.
   }
 }
 ```
+
+**Common acknowledgments**: "Thanks", "Got it", "Understood", "Ok", "Will do", etc.
+
+## Tool Usage Workflow
+
+The typical workflow for using these tools is:
+
+1. **Ask**: Use `ask_the_boss_on_slack` to ask your initial question
+2. **Clarify** (if needed): If the boss doesn't understand or asks back, use `clarify_with_the_boss_on_slack` to re-ask more clearly
+3. **Acknowledge**: Once you receive a helpful response, use `acknowledge_the_boss_on_slack` to confirm you received their answer
+
+This workflow ensures proper communication etiquette and helps maintain a good relationship with the human boss.
 
 ## Development
 
