@@ -1,22 +1,23 @@
 {
-  "name": "@rodrigolive/ask-on-slack-mcp",
+  "name": "@rodrigolive/ask-on-slack",
   "version": "0.1.0",
   "description": "MCP server to ask humans on Slack from AI agents using HTTP polling",
   "type": "module",
   "private": false,
   "bin": {
-    "ask-on-slack-mcp": "dist/index.js"
+    "ask-on-slack": "bin/ask-on-slack"
   },
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/stdio.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "scripts": {
-    "build": "rm -rf dist && bun build --target=bun --minify --sourcemap --outdir=dist src/index.ts",
-    "dev": "bun --hot src/index.ts",
-    "start": "node dist/index.js",
+    "build": "rm -rf dist && mkdir -p dist && bun build --target=bun --outdir=dist src/cli.ts && bun build --target=bun --outdir=dist src/stdio.ts && bun build --target=bun --outdir=dist src/serve.ts",
+    "dev": "bun --hot src/cli.ts",
+    "start": "bun dist/cli.js",
     "clean": "rm -rf dist .coverage",
     "test": "bun test --watch",
     "test:ci": "bun test --coverage",
@@ -25,11 +26,15 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/express": "^5.0.3",
     "@types/node": "^20.11.30",
     "typescript": "^5.6.2"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.0",
+    "express": "^5.1.0",
+    "mcp-remote": "^0.1.29",
+    "sade": "^1.8.1",
     "zod": "^3.23.8"
   },
   "engines": {

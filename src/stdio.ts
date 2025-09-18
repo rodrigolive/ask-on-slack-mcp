@@ -45,7 +45,7 @@ function getConfig(): Config {
     };
 }
 
-async function main() {
+export async function main() {
     const config = getConfig();
     const logger = createLogger(config);
 
@@ -176,8 +176,3 @@ async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
 }
-
-main().catch(e => {
-    console.error(`[ERROR] ${new Date().toISOString()} - ${e?.stack || e}`);
-    process.exit(1);
-});

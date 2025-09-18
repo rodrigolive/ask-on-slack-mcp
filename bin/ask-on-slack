@@ -1,0 +1,34 @@
+#!/usr/bin/env bun
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Try built CLI first, fallback to source CLI
+const distCliPath = join(__dirname, '..', 'dist', 'cli.js');
+const srcCliPath = join(__dirname, '..', 'src', 'cli.ts');
+
+const cliPath = existsSync(distCliPath) ? distCliPath : srcCliPath;
+
+// Show which CLI is being used (only in development)
+if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
+  console.error(`Using CLI: ${cliPath}`);
+}
+
+// Spawn the CLI with all arguments passed through
+const child = spawn('bun', [cliPath, ...process.argv.slice(2)], {
+  stdio: 'inherit',
+  cwd: process.cwd()
+});
+
+child.on('error', (error) => {
+  console.error(`Failed to start CLI: ${error.message}`);
+  process.exit(1);
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});
