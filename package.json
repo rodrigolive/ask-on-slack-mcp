@@ -1,0 +1,39 @@
+{
+  "name": "@rodrigolive/ask-on-slack-mcp",
+  "version": "0.1.0",
+  "description": "MCP server to ask humans on Slack from AI agents using HTTP polling",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "ask-on-slack-mcp": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && bun build --target=bun --minify --sourcemap --outdir=dist src/index.ts",
+    "dev": "bun --hot src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist .coverage",
+    "test": "bun test --watch",
+    "test:ci": "bun test --coverage",
+    "lint": "echo 'No linter configured'",
+    "format": "echo 'No formatter configured'"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.0",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.1.0"
+  }
+}
