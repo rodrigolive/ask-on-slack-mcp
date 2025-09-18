@@ -5,6 +5,7 @@ export interface Config {
   slackAppToken: string | undefined
   slackChannelId: string | undefined
   slackUserId: string | undefined
+  role: string
   logLevel: LogLevel
   logFile?: string
 }

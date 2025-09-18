@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { createLogger } from './logger.ts';
 import { NoopHuman } from './human.ts';
 import { SlackHuman } from './slack-http-client.ts';
+import { getRole } from './role/index.ts';
 import type { Config, LogLevel } from './types.ts';
 
 function parseArgs(argv: string[]) {
@@ -37,6 +38,7 @@ function getConfig(): Config {
         slackAppToken: args['slack-app-token'] || env.ASK_SLACK_APP,
         slackChannelId: args['slack-channel-id'] || env.ASK_SLACK_CHANNEL,
         slackBotUserId: args['slack-user-id'] || env.ASK_SLACK_USER,
+        role: args['role'] || env.ASK_SLACK_ROLE || 'boss',
         logLevel: toLevel(
             (args['log-level'] as string) || (env.LOG_LEVEL as string) || 'INFO'
         ),
@@ -47,24 +49,21 @@ function getConfig(): Config {
     };
 }
 
-function createMcpServer(human: NoopHuman | SlackHuman, logger: any) {
+function createMcpServer(human: NoopHuman | SlackHuman, logger: any, roleConfig: any) {
     const server = new McpServer({
         name: 'ask-on-slack-mcp',
         version: '0.1.0'
     });
 
     server.registerTool(
-        'ask_the_boss_on_slack',
+        `ask_the_${roleConfig.name}_on_slack`,
         {
-            title: 'Ask on Slack',
-            description:
-                'Ask a human boss for information that only they would know. Use for preferences, project-specific context, local env details, non-public info, doubts. If the user replies with another question, call this tool again. Only use this tool when you really need human input.',
+            title: roleConfig.askTool.title,
+            description: roleConfig.askTool.description,
             inputSchema: {
                 question: z
                     .string()
-                    .describe(
-                        'The question to ask the human boss. Be specific and provide context.'
-                    )
+                    .describe(roleConfig.askTool.inputDescription)
             }
         },
         async ({ question }) => {
@@ -81,17 +80,14 @@ function createMcpServer(human: NoopHuman | SlackHuman, logger: any) {
     );
 
     server.registerTool(
-        'clarify_with_the_boss_on_slack',
+        `clarify_with_the_${roleConfig.name}_on_slack`,
         {
-            title: 'Clarify with the boss on Slack',
-            description:
-                'If you called the ask_the_boss_on_slack tool but the boss did not understand your question or asked anything back, use MUST this tool to re-ask in a clearer way. Do not use this tool if you have not called ask_the_boss_on_slack before. Only use this tool when you really need human input.',
+            title: roleConfig.clarifyTool.title,
+            description: roleConfig.clarifyTool.description,
             inputSchema: {
                 question: z
                     .string()
-                    .describe(
-                        'The clarification to ask the human boss. Be specific and provide context.'
-                    )
+                    .describe(roleConfig.clarifyTool.inputDescription)
             }
         },
         async ({ question }) => {
@@ -108,17 +104,14 @@ function createMcpServer(human: NoopHuman | SlackHuman, logger: any) {
     );
 
     server.registerTool(
-        'acknowledge_the_boss_on_slack',
+        `acknowledge_the_${roleConfig.name}_on_slack`,
         {
-            title: 'Acknowledge the boss on Slack',
-            description:
-                'If you called the ask_the_boss_on_slack tool and the boss replied, then you MUST use this tool to acknowledge the reply with a simple message like "Thanks", "Got it", "Understood", "Ok", "Will do", etc. Do not use this tool if you have not called ask_the_boss_on_slack before',
+            title: roleConfig.acknowledgeTool.title,
+            description: roleConfig.acknowledgeTool.description,
             inputSchema: {
                 acknowledgement: z
                     .string()
-                    .describe(
-                        'The text to tell the boss to acknowledge receiving their reply. Keep it short.'
-                    )
+                    .describe(roleConfig.acknowledgeTool.inputDescription)
             }
         },
         async ({ acknowledgement }) => {
@@ -126,7 +119,7 @@ function createMcpServer(human: NoopHuman | SlackHuman, logger: any) {
                 const q = String(acknowledgement || '').trim();
                 if (!q) throw new Error('Missing required parameter: acknowledgement');
                 await human.ask(q, false);
-                return { content: [{ type: 'text', text: '(the boss heard you)' }] };
+                return { content: [{ type: 'text', text: `(the ${roleConfig.name} heard you)` }] };
             } catch (e: any) {
                 logger.error(`clarify_on_slack error: ${e?.message || e}`);
                 throw e;
@@ -167,6 +160,10 @@ export async function main() {
         );
     }
 
+    // Get role configuration
+    const roleConfig = getRole(config.role);
+    logger.info(`Using role: ${roleConfig.name}`);
+
     const port = parseInt(process.env.PORT || '3000');
     const app = express();
     
@@ -204,7 +201,7 @@ export async function main() {
                 };
                 
                 // Connect the transport to the MCP server BEFORE handling the request
-                const server = createMcpServer(human, logger);
+                const server = createMcpServer(human, logger, roleConfig);
                 await server.connect(transport);
                 await transport.handleRequest(req, res, req.body);
                 return; // Already handled

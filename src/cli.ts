@@ -13,6 +13,7 @@ prog
   .option('--slack-app-token', 'App-Level Token (xapp-...)')
   .option('--slack-channel-id', 'Channel ID where the bot will operate')
   .option('--slack-user-id', 'User ID to mention when asking questions')
+  .option('--role, -r', 'Role for the human (boss, expert, or custom name)')
   .option('--log-level', 'Logging level (default: INFO)')
   .option('--log-file', 'Log file path (if specified, logs will be written to file instead of stderr)');
 

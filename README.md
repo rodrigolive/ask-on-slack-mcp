@@ -143,6 +143,7 @@ bun run start
 - `--slack-app-token` - App-Level Token (xapp-...)
 - `--slack-channel-id` - Channel ID where the bot will operate
 - `--slack-user-id` - User ID to mention when asking questions
+- `--role, -r` - Role for the human (boss, expert, or custom name)
 - `--log-level` - Logging level (default: INFO)
 - `--log-file` - Log file path (if specified, logs will be written to file instead of stderr)
 - `--port` - Port to listen on for HTTP mode (default: 3000)
@@ -153,9 +154,48 @@ bun run start
 - `ASK_SLACK_APP` - App-Level Token (xapp-...)
 - `ASK_SLACK_CHANNEL` - Channel ID where the bot will operate
 - `ASK_SLACK_USER` - User ID to mention when asking questions
+- `ASK_SLACK_ROLE` - Role for the human (boss, expert, or custom name)
 - `LOG_LEVEL` - Logging level (default: INFO)
 - `LOG_FILE` - Log file path
 - `PORT` - Port for HTTP mode (default: 3000)
+
+## Role Configuration
+
+The server supports different roles for the human you're asking questions to. Each role changes the tool names and descriptions to match the context.
+
+### Available Roles
+
+#### `boss` (Default)
+- **When to use**: When you need approval, decisions, or information that requires authority
+- **Tool names**: `ask_the_boss_on_slack`, `clarify_with_the_boss_on_slack`, `acknowledge_the_boss_on_slack`
+- **Description**: Focused on preferences, project-specific context, local environment details, non-public information, and decisions
+
+#### `expert`
+- **When to use**: When you need to confirm expert details, validate technical information, or get expert opinion
+- **Tool names**: `ask_the_expert_on_slack`, `clarify_with_the_expert_on_slack`, `acknowledge_the_expert_on_slack`
+- **Description**: Focused on technical details, verification, specialized knowledge, and expert confirmation
+
+#### Custom Role
+- **When to use**: When you want a generic role that doesn't assume boss or expert context
+- **Tool names**: `ask_the_human_on_slack`, `clarify_with_the_human_on_slack`, `acknowledge_the_human_on_slack`
+- **Description**: Generic human interaction for any type of question or assistance
+
+### Role Examples
+
+```bash
+# Use boss role (default)
+bunx @rodrigolive/ask-on-slack stdio
+
+# Use expert role
+bunx @rodrigolive/ask-on-slack stdio --role expert
+
+# Use custom role
+bunx @rodrigolive/ask-on-slack stdio --role consultant
+
+# Using environment variable
+export ASK_SLACK_ROLE="expert"
+bunx @rodrigolive/ask-on-slack stdio
+```
 
 ## MCP Client Configuration
 
@@ -301,18 +341,30 @@ ASK_SLACK_USER = "U1234567890"
 
 ## Available Tools
 
-The server provides three MCP tools for interacting with humans via Slack:
+The server provides three MCP tools for interacting with humans via Slack. The tool names and descriptions change based on the selected role:
 
-### `ask_the_boss_on_slack`
+### Dynamic Tool Names
+
+The tool names are dynamically generated based on the role:
+- **Boss role**: `ask_the_boss_on_slack`, `clarify_with_the_boss_on_slack`, `acknowledge_the_boss_on_slack`
+- **Expert role**: `ask_the_expert_on_slack`, `clarify_with_the_expert_on_slack`, `acknowledge_the_expert_on_slack`
+- **Custom role**: `ask_the_human_on_slack`, `clarify_with_the_human_on_slack`, `acknowledge_the_human_on_slack`
+
+### Tool Types
+
+#### 1. Ask Tool (`ask_the_{role}_on_slack`)
 
 **Purpose**: Main tool for asking questions to humans via Slack when you need information that only they would know.
 
-**When to use**: Use for preferences, project-specific context, local environment details, non-public information, or when you have doubts. Only use this tool when you really need human input.
+**When to use**: 
+- **Boss role**: Use for preferences, project-specific context, local environment details, non-public information, or when you have doubts
+- **Expert role**: Use when you need to confirm expert details, validate technical information, or get expert opinion
+- **Custom role**: Use when you need human perspective, local information, or confirmation that only a human can provide
 
 **Parameters:**
-- `question` (string): The question to ask the human boss. Be specific and provide context.
+- `question` (string): The question to ask the human. Be specific and provide context.
 
-**Example:**
+**Example (Boss role):**
 ```json
 {
   "tool": "ask_the_boss_on_slack",
@@ -322,16 +374,26 @@ The server provides three MCP tools for interacting with humans via Slack:
 }
 ```
 
+**Example (Expert role):**
+```json
+{
+  "tool": "ask_the_expert_on_slack",
+  "arguments": {
+    "question": "Can you verify if this database schema design follows best practices?"
+  }
+}
+```
+
 **Important**: If the user replies with another question, call this tool again.
 
-### `clarify_with_the_boss_on_slack`
+#### 2. Clarify Tool (`clarify_with_the_{role}_on_slack`)
 
-**Purpose**: Re-ask a question in a clearer way if the boss didn't understand your original question or asked something back.
+**Purpose**: Re-ask a question in a clearer way if the human didn't understand your original question or asked something back.
 
-**When to use**: If you called `ask_the_boss_on_slack` but the boss did not understand your question or asked anything back, you MUST use this tool to re-ask in a clearer way. Do not use this tool if you have not called `ask_the_boss_on_slack` before.
+**When to use**: If you called the ask tool but the human did not understand your question or asked anything back, you MUST use this tool to re-ask in a clearer way. Do not use this tool if you have not called the ask tool before.
 
 **Parameters:**
-- `question` (string): The clarification to ask the human boss. Be specific and provide context.
+- `question` (string): The clarification to ask the human. Be specific and provide context.
 
 **Example:**
 ```json
@@ -343,14 +405,14 @@ The server provides three MCP tools for interacting with humans via Slack:
 }
 ```
 
-### `acknowledge_the_boss_on_slack`
+#### 3. Acknowledge Tool (`acknowledge_the_{role}_on_slack`)
 
-**Purpose**: Acknowledge receiving a reply from the boss with a simple acknowledgment message.
+**Purpose**: Acknowledge receiving a reply from the human with a simple acknowledgment message.
 
-**When to use**: If you called `ask_the_boss_on_slack` and the boss replied, then you MUST use this tool to acknowledge the reply. Do not use this tool if you have not called `ask_the_boss_on_slack` before.
+**When to use**: If you called the ask tool and the human replied, then you MUST use this tool to acknowledge the reply. Do not use this tool if you have not called the ask tool before.
 
 **Parameters:**
-- `acknowledgement` (string): The text to tell the boss to acknowledge receiving their reply. Keep it short.
+- `acknowledgement` (string): The text to tell the human to acknowledge receiving their reply. Keep it short.
 
 **Example:**
 ```json
@@ -368,11 +430,11 @@ The server provides three MCP tools for interacting with humans via Slack:
 
 The typical workflow for using these tools is:
 
-1. **Ask**: Use `ask_the_boss_on_slack` to ask your initial question
-2. **Clarify** (if needed): If the boss doesn't understand or asks back, use `clarify_with_the_boss_on_slack` to re-ask more clearly
-3. **Acknowledge**: Once you receive a helpful response, use `acknowledge_the_boss_on_slack` to confirm you received their answer
+1. **Ask**: Use the ask tool to ask your initial question
+2. **Clarify** (if needed): If the human doesn't understand or asks back, use the clarify tool to re-ask more clearly
+3. **Acknowledge**: Once you receive a helpful response, use the acknowledge tool to confirm you received their answer
 
-This workflow ensures proper communication etiquette and helps maintain a good relationship with the human boss.
+This workflow ensures proper communication etiquette and helps maintain a good relationship with the human.
 
 ## Development
 
